@@ -167,4 +167,11 @@ RICE Score = (Reach × Impact × Confidence) / Effort
 ```
 
 ---
-*Project engineered from first principles according to Senior Business Analyst & Product Analyst industry standards. Fully reproducible via DuckDB, PostgreSQL, Microsoft Excel, and Power BI.*
+
+## 📬 Contact & Discussion
+
+Have questions about this analysis, the root-cause methodology, or how to adapt these GA4 e-commerce models for your product? Feel free to open an issue or connect!
+
+- **Analyst**: Portfolio Project — E-Commerce Growth & Product Analytics
+- **Tools Used**: GA4 Telemetry, SQL (DuckDB/PostgreSQL), Microsoft Excel (Financial Modeling), Power BI (DAX & Visualization)
+- **Methodology**: 4-Stage Conversion Funnel, Cohort Segmentation, Root-Cause Diagnostics, RICE Prioritization Framework
