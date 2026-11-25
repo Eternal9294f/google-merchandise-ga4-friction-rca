@@ -1,0 +1,69 @@
+{
+  "name": "GoogleMerchandiseExecutiveLight",
+  "dataColors": [
+    "#1A73E8",
+    "#0F9D58",
+    "#F4B400",
+    "#DB4437",
+    "#202124",
+    "#5F6368",
+    "#4285F4",
+    "#34A853"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#202124",
+  "tableAccent": "#1A73E8",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "outspacePane": [
+          {
+            "backgroundColor": { "solid": { "color": "#F8F9FA" } },
+            "foregroundColor": { "solid": { "color": "#202124" } }
+          }
+        ],
+        "visualContainer": [
+          {
+            "background": { "solid": { "color": "#FFFFFF" } },
+            "border": {
+              "show": true,
+              "color": { "solid": { "color": "#DADCE0" } },
+              "radius": 6
+            },
+            "dropShadow": {
+              "show": true,
+              "color": { "solid": { "color": "#E8EAED" } },
+              "position": "Outer",
+              "preset": "BottomRight"
+            }
+          }
+        ],
+        "title": [
+          {
+            "fontColor": { "solid": { "color": "#202124" } },
+            "fontSize": 12,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [
+          {
+            "color": { "solid": { "color": "#1A73E8" } },
+            "fontSize": 24,
+            "fontFamily": "Segoe UI Bold"
+          }
+        ],
+        "categoryLabels": [
+          {
+            "color": { "solid": { "color": "#5F6368" } },
+            "fontSize": 10,
+            "fontFamily": "Segoe UI"
+          }
+        ]
+      }
+    }
+  }
+}

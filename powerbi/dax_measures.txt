@@ -1,0 +1,146 @@
+/* =====================================================================
+   GOOGLE MERCHANDISE STORE (GA4) — POWER BI DAX MEASURES REPOSITORY
+   Scope: 6 Core Product KPIs, 4-Stage Funnel Metrics, MoM Trajectories,
+   and Mobile Friction RCA Diagnostics
+   ===================================================================== */
+
+// =====================================================================
+// SECTION 1: CORE PRODUCT KPIS (EXACTLY 6 DEFINED METRICS)
+// =====================================================================
+
+// KPI 1: Total Sessions
+Total Sessions = 
+COUNTROWS('ga4_sessions')
+
+// KPI 2: Overall Conversion Rate %
+Overall Conversion Rate % = 
+DIVIDE(
+    CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[purchased] = 1),
+    [Total Sessions],
+    0
+)
+
+// KPI 3: Cart-to-Checkout Rate %
+Cart-to-Checkout Rate % = 
+VAR CartSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[added_to_cart] = 1)
+VAR CheckoutSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[began_checkout] = 1)
+RETURN
+DIVIDE(CheckoutSessions, CartSessions, 0)
+
+// KPI 4: Checkout Abandonment Rate %
+Checkout Abandonment Rate % = 
+VAR CheckoutSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[began_checkout] = 1)
+VAR PurchasedSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[purchased] = 1)
+RETURN
+IF(
+    CheckoutSessions = 0,
+    0,
+    1 - DIVIDE(PurchasedSessions, CheckoutSessions, 0)
+)
+
+// KPI 5: Total Revenue
+Total Revenue = 
+SUM('ga4_sessions'[order_revenue_usd])
+
+// KPI 6: Average Order Value (AOV)
+Average Order Value = 
+VAR PurchasedSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[purchased] = 1)
+RETURN
+DIVIDE([Total Revenue], PurchasedSessions, 0)
+
+
+// =====================================================================
+// SECTION 2: FOUR-STAGE FUNNEL VOLUME & STEP-TO-STEP CONVERSION
+// =====================================================================
+
+Stage 1 View Item Sessions = 
+CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[viewed_item] = 1)
+
+Stage 2 Add to Cart Sessions = 
+CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[added_to_cart] = 1)
+
+Stage 3 Began Checkout Sessions = 
+CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[began_checkout] = 1)
+
+Stage 4 Purchase Sessions = 
+CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[purchased] = 1)
+
+View-to-Cart Conversion % = 
+DIVIDE([Stage 2 Add to Cart Sessions], [Stage 1 View Item Sessions], 0)
+
+Checkout-to-Purchase Conversion % = 
+DIVIDE([Stage 4 Purchase Sessions], [Stage 3 Began Checkout Sessions], 0)
+
+Cumulative Funnel Conversion % = 
+DIVIDE([Stage 4 Purchase Sessions], [Total Sessions], 0)
+
+
+// =====================================================================
+// SECTION 3: CHECKOUT FRICTION & ROOT-CAUSE ANALYSIS (RCA) MEASURES
+// =====================================================================
+
+Total Shipping Errors = 
+CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[shipping_step_error] = 1)
+
+Shipping Step Error Rate % = 
+DIVIDE(
+    [Total Shipping Errors],
+    [Stage 3 Began Checkout Sessions],
+    0
+)
+
+Mobile Checkout-to-Purchase Conversion % = 
+CALCULATE(
+    [Checkout-to-Purchase Conversion %],
+    'ga4_sessions'[device_category] = "mobile"
+)
+
+Desktop Checkout-to-Purchase Conversion % = 
+CALCULATE(
+    [Checkout-to-Purchase Conversion %],
+    'ga4_sessions'[device_category] = "desktop"
+)
+
+Mobile Shipping Step Error Rate % = 
+CALCULATE(
+    [Shipping Step Error Rate %],
+    'ga4_sessions'[device_category] = "mobile"
+)
+
+Estimated Lost Revenue From Shipping Errors = 
+VAR UnblockedConversion = 0.585
+VAR UnblockedAOV = 86.40
+VAR ErrorSessions = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[shipping_step_error] = 1)
+VAR ActualPurchasedWithError = CALCULATE(COUNTROWS('ga4_sessions'), 'ga4_sessions'[shipping_step_error] = 1 && 'ga4_sessions'[purchased] = 1)
+VAR ExpectedPurchases = ErrorSessions * UnblockedConversion
+VAR LostOrders = ExpectedPurchases - ActualPurchasedWithError
+RETURN
+IF(LostOrders > 0, LostOrders * UnblockedAOV, 0)
+
+
+// =====================================================================
+// SECTION 4: MONTH-OVER-MONTH (MoM) TRAJECTORIES & COHORT ANALYSIS
+// =====================================================================
+
+Total Revenue Previous Month = 
+CALCULATE(
+    [Total Revenue],
+    DATEADD('ga4_sessions'[event_date], -1, MONTH)
+)
+
+Revenue MoM Growth % = 
+VAR CurrentRev = [Total Revenue]
+VAR PrevRev = [Total Revenue Previous Month]
+RETURN
+DIVIDE(CurrentRev - PrevRev, PrevRev, 0)
+
+Conversion Rate MoM Delta = 
+VAR CurrentCR = [Overall Conversion Rate %]
+VAR PrevCR = CALCULATE([Overall Conversion Rate %], DATEADD('ga4_sessions'[event_date], -1, MONTH))
+RETURN
+CurrentCR - PrevCR
+
+Returning User Revenue Share % = 
+VAR ReturningRev = CALCULATE([Total Revenue], 'ga4_sessions'[user_type] = "returning")
+RETURN
+DIVIDE(ReturningRev, [Total Revenue], 0)
